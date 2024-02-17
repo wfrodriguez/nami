@@ -9,9 +9,7 @@ Reset  := $(shell tput -Txterm sgr0)
 # Nombre del binario
 BinName = nami
 # Ubicación del archivo main
-Main = cmd/nami/main.go
-# Argumentos de la línea de comandos
-Args =
+Main = *.go
 
 # Vars
 
