@@ -25,7 +25,9 @@ func check(err error) { // {{{
 	if err != nil {
 		fmt.Println("¡¡¡Ha ocurrido un error!!!")
 		fmt.Println(err)
-		fmt.Println("Causa:", errors.Cause(err))
+		if errors.Cause(err) != nil {
+			fmt.Println("Causa:", errors.Cause(err))
+		}
 		d := errors.Details(err)
 		if len(d) > 0 {
 			fmt.Println("Detalles:")
@@ -37,6 +39,8 @@ func check(err error) { // {{{
 			fmt.Println("Stacktrace:")
 			fmt.Printf("  %+v\n", err)
 		}
+		fmt.Print("Presione Enter para continuar...")
+		os.Stdin.Read(make([]byte, 1))
 		os.Exit(1)
 	}
 } // }}}
@@ -74,5 +78,5 @@ func main() { // {{{
 		fzf.WithHeader("Documentación de Go"))
 	check(err)
 
-	PrintDef(Exec("go", "doc", GoItems[idx]))
+	PrintDef(GoItems[idx], Exec("go", "doc", GoItems[idx]))
 } // }}}

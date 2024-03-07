@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"unicode/utf8"
 
 	"gitlab.com/tozd/go/errors"
 	"golang.org/x/mod/modfile"
@@ -85,6 +84,7 @@ func FindGoFiles(path string, pkg *Package) errors.E { // {{{
 			prefix := strings.TrimPrefix(p, path)
 			prefix = reDel.ReplaceAllString(prefix, "")
 
+			slog.Debug(fmt.Sprintf("tozd: %q", prefix))
 			pkg.Types = append(pkg.Types, getTypes(pkg.Pkg, prefix, code)...)
 			pkg.Methods = append(pkg.Methods, getMethods(pkg.Pkg, prefix, code)...)
 			pkg.Functions = append(pkg.Functions, getFunctions(pkg.Pkg, prefix, code)...)
@@ -109,10 +109,11 @@ func getFunctions(pkg, prefix, text string) []string { // {{{
 	re := regexp.MustCompile(`(?m)^func ([A-Z][^\(]+)`)
 	matches := re.FindAllStringSubmatch(text, -1)
 	fns := make([]string, 0, len(matches))
+	// slog.Debug(fmt.Sprintf("Package: %q, Prefix: %q, Matches: %q", pkg, prefix, matches))
 	for _, l := range matches {
-		f := strings.TrimPrefix(IF(utf8.RuneCountInString(l[1]) > 1, prefix+".", ""), ".") + l[1]
-		slog.Debug(fmt.Sprintf("     󰊕 %s", pkg+"."+f))
-		fns = append(fns, pkg+"."+f)
+		f := pkg + prefix + "." + l[1]
+		slog.Debug(fmt.Sprintf("     󰊕 %s", f))
+		fns = append(fns, f)
 	}
 
 	return fns
@@ -124,18 +125,7 @@ func getMethods(pkg, prefix, text string) []string { // {{{
 	matches := re.FindAllStringSubmatch(text, -1)
 	meths := make([]string, 0, len(matches))
 	for _, l := range matches {
-		m := strings.TrimPrefix(
-			IF(
-				utf8.RuneCountInString(l[1]) > 1,
-				prefix+".",
-				"",
-			)+fmt.Sprintf(
-				"%s.%s",
-				l[1],
-				l[2],
-			),
-			".",
-		)
+		m := fmt.Sprintf("%.s.%s.%s", prefix, l[1], l[2])
 		slog.Debug(fmt.Sprintf("     󰡱 %s", pkg+m))
 		meths = append(meths, pkg+m)
 	}
@@ -148,13 +138,11 @@ func getTypes(pkg, prefix, text string) []string { // {{{
 	re := regexp.MustCompile(`(?m)^type ([A-Z]\w+)\b`)
 	matches := re.FindAllStringSubmatch(text, -1)
 	types := make([]string, 0, len(matches))
+	prefix = pkg + prefix
 	for _, l := range matches {
-		t := strings.TrimPrefix(
-			IF(utf8.RuneCountInString(l[1]) > 1, prefix+".", ""),
-			".",
-		) + l[1]
-		slog.Debug(fmt.Sprintf("      %s", pkg+t))
-		types = append(types, pkg+t)
+		t := prefix + "." + l[1]
+		slog.Debug(fmt.Sprintf("      %s", t))
+		types = append(types, t)
 	}
 
 	return types
