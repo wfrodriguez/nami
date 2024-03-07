@@ -102,6 +102,13 @@ build: validate
 	@mkdir -p ./dist
 	go build -ldflags="-X main.Version='$(Version)' -X main.CommitHash='$(CommitHash)' -X main.BuildTimestamp='$(BuildTimestamp)'" -o ./dist/$(BinName) $(Main)
 
+.PHONY: build/all
+## Genera los binarios para linux, darwin y windows
+build/all: build
+	@GOOS=linux GOARCH=amd64 go build -ldflags="-X main.Version='$(Version)' -X main.CommitHash='$(CommitHash)' -X main.BuildTimestamp='$(BuildTimestamp)'" -o ./dist/$(BinName) $(Main)
+	@GOOS=darwin GOARCH=amd64 go build -ldflags="-X main.Version='$(Version)' -X main.CommitHash='$(CommitHash)' -X main.BuildTimestamp='$(BuildTimestamp)'" -o ./dist/$(BinName) $(Main)
+	@GOOS=windows GOARCH=amd64 go build -ldflags="-X main.Version='$(Version)' -X main.CommitHash='$(CommitHash)' -X main.BuildTimestamp='$(BuildTimestamp)'" -o ./dist/$(BinName) $(Main)
+
 .PHONY: run/go
 ## Inicia la aplicación desde el código fuente
 run/go: validate
